@@ -68,32 +68,22 @@
             "新年快乐", "恭喜发财", "万事如意", "身体健康", 
             "2026", "🐎 马到成功", "今年万事定称心", "前程似锦", 
             "韶华仍在", "明年依旧", "相与笑春风", "朝朝暮暮，岁岁平安", 
-            "愿新年，胜旧年", "如花似叶，岁岁年年，共占春风", "福气满满", "好运连连",
+            "愿新年，胜旧年", "福气满满", "好运连连",
             "阖家欢乐", "一帆风顺", "笑口常开", "鹏程万里",
             "顺遂无忧", "喜气洋洋", "春风得意", "步步高升",
             "未来可期", "欣欣向荣", "四季平安", "五福临门",
             "六六大顺", "七星高照", "八方来财", "九九同心",
-            "十全十美","岁岁常欢愉，年年皆胜意"
+            "十全十美","岁岁常欢愉", "年年皆胜意"
         ];
 
-        // --- 新增：洗牌逻辑，确保不重复 ---
-        let shuffleList = [];
-        let poolIndex = 0;
-
-        function refreshShuffleList() {
-            shuffleList = [...originalTexts].sort(() => Math.random() - 0.5);
-            poolIndex = 0;
-        }
+        // --- 核心修改：顺序播放逻辑 ---
+        let currentIndex = 0; // 记录当前播放到哪一条
 
         const box = document.getElementById('box');
         const MAX_CARDS = 6;
 
         function addNextCard() {
-            // 如果池子抽完了，重新洗牌
-            if (poolIndex >= shuffleList.length) {
-                refreshShuffleList();
-            }
-
+            // 1. 清理多余的卡片
             const currentCards = box.getElementsByClassName('card');
             if (currentCards.length >= MAX_CARDS) {
                 const firstCard = currentCards[0];
@@ -101,13 +91,17 @@
                 setTimeout(() => firstCard.remove(), 500);
             }
 
+            // 2. 创建新卡片
             const c = document.createElement('div');
             c.className = 'card';
             
-            // 按洗牌后的顺序取出
-            c.innerHTML = shuffleList[poolIndex];
-            poolIndex++;
+            // 3. 严格按顺序提取文字
+            c.innerHTML = originalTexts[currentIndex];
             
+            // 4. 更新索引：加1，如果到底了就归零实现无限循环
+            currentIndex = (currentIndex + 1) % originalTexts.length;
+            
+            // 5. 设置随机位置（为了美观，位置还是随机，但词是有序的）
             const x = Math.random() * (window.innerWidth - 170) + 10;
             const y = Math.random() * (window.innerHeight - 250) + 100;
             const r = (Math.random() - 0.5) * 20;
@@ -119,10 +113,10 @@
             c.onclick = () => { c.style.opacity = "0"; setTimeout(() => c.remove(), 300); };
             box.appendChild(c);
             
-            setTimeout(addNextCard, 1500); // 稍微调慢一点节奏，更有质感
+            setTimeout(addNextCard, 1500); 
         }
 
-        // --- 烟花和文字特效保持原样 ---
+        // --- 烟花和背景特效保持原样 ---
         const canvas = document.getElementById('fg');
         const ctx = canvas.getContext('2d');
         let particles = [];
@@ -176,7 +170,6 @@
         }
 
         window.onload = () => { 
-            refreshShuffleList(); // 初始化洗牌
             loop(); 
             setTimeout(addNextCard, 1000); 
             setTimeout(showFireworkText, 1500); 
@@ -184,4 +177,5 @@
     </script>
 </body>
 </html>
+
 
